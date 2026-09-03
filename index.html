@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>KisanQueue | Smart Procurement</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="logo">
+            🌾
+        </div>
+
+        <div>
+            <h1>KisanQueue</h1>
+            <p>Smart Farmer Procurement System</p>
+        </div>
+
+    </div>
+
+    <div class="status" id="backendStatus" onclick="checkBackendHealth(true)" title="Click to test backend connection" style="cursor: pointer;">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting...</span>
+    </div>
+
+</header>
+
+<div id="offlineBanner" class="offline-banner hidden">
+    <span>⚠️ <strong>Backend Offline:</strong> Unable to connect to the backend API at <code id="apiEndpointText">http://127.0.0.1:8000</code>. Please start the server using <code>python run.py</code> or <code>start.bat</code>.</span>
+    <button class="retry-btn" onclick="checkBackendHealth(true)">🔄 Reconnect</button>
+</div>
+
+
+<nav class="tabs">
+
+    <button
+        class="tab active"
+        onclick="showTab('farmerTab', this)"
+    >
+        👨‍🌾 Farmer Portal
+    </button>
+
+    <button
+        class="tab"
+        onclick="showTab('operatorTab', this)"
+    >
+        🧑‍💼 Operator Dashboard
+    </button>
+
+    <button
+        class="tab"
+        onclick="showTab('bookingTab', this)"
+    >
+        🔎 My Booking
+    </button>
+
+</nav>
+
+
+<main class="container">
+
+
+<!-- ================================================= -->
+<!-- FARMER PORTAL -->
+<!-- ================================================= -->
+
+<section id="farmerTab" class="tab-content">
+
+    <div class="hero">
+
+        <div>
+
+            <span class="badge">
+                SMART PROCUREMENT
+            </span>
+
+            <h2>
+                No more long waiting at procurement centres.
+            </h2>
+
+            <p>
+                Register, book a slot, receive a digital token
+                and track your queue in real time.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+
+        <!-- Registration -->
+
+        <div class="card">
+
+            <div class="card-title">
+
+                <div>
+                    <h3>👨‍🌾 Farmer Registration</h3>
+                    <p>Create your farmer profile</p>
+                </div>
+
+            </div>
+
+
+            <form id="farmerForm">
+
+                <label>
+                    Farmer Name
+                </label>
+
+                <input
+                    id="farmerName"
+                    type="text"
+                    placeholder="Enter farmer name"
+                    required
+                >
+
+
+                <label>
+                    Mobile Number
+                </label>
+
+                <input
+                    id="farmerPhone"
+                    type="tel"
+                    placeholder="Enter mobile number"
+                    required
+                >
+
+
+                <label>
+                    Village
+                </label>
+
+                <input
+                    id="farmerVillage"
+                    type="text"
+                    placeholder="Enter village"
+                    required
+                >
+
+
+                <button class="primary-btn">
+                    Register Farmer
+                </button>
+
+            </form>
+
+            <div id="farmerMessage"></div>
+
+        </div>
+
+
+        <!-- Booking -->
+
+        <div class="card">
+
+            <div class="card-title">
+
+                <div>
+                    <h3>📅 Book Procurement Slot</h3>
+                    <p>Reserve your place in the queue</p>
+                </div>
+
+            </div>
+
+
+            <form id="bookingForm">
+
+                <label>
+                    Farmer ID
+                </label>
+
+                <input
+                    id="bookingFarmerId"
+                    type="number"
+                    placeholder="Enter Farmer ID"
+                    required
+                >
+
+
+                <label>
+                    Procurement Centre
+                </label>
+
+                <select
+                    id="centre"
+                    required
+                >
+
+                    <option value="">
+                        Select Centre
+                    </option>
+
+                    <option>
+                        Centre A
+                    </option>
+
+                    <option>
+                        Centre B
+                    </option>
+
+                    <option>
+                        Centre C
+                    </option>
+
+                </select>
+
+
+                <label>
+                    Crop
+                </label>
+
+                <select
+                    id="crop"
+                    required
+                >
+
+                    <option value="">
+                        Select Crop
+                    </option>
+
+                    <option>Paddy</option>
+                    <option>Wheat</option>
+                    <option>Rice</option>
+                    <option>Maize</option>
+                    <option>Other</option>
+
+                </select>
+
+
+                <label>
+                    Quantity (Quintal)
+                </label>
+
+                <input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    placeholder="Example: 50"
+                    required
+                >
+
+
+                <label>
+                    Preferred Slot
+                </label>
+
+                <select
+                    id="slot"
+                    required
+                >
+
+                    <option value="">
+                        Select Slot
+                    </option>
+
+                    <option>09:00 AM</option>
+                    <option>09:15 AM</option>
+                    <option>09:30 AM</option>
+                    <option>09:45 AM</option>
+                    <option>10:00 AM</option>
+                    <option>10:15 AM</option>
+
+                </select>
+
+
+                <button class="primary-btn">
+                    Generate Token
+                </button>
+
+            </form>
+
+            <div id="bookingMessage"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Queue -->
+
+    <div class="card">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h3>📊 Live Procurement Queue</h3>
+
+                <p>
+                    Real-time queue status
+                </p>
+
+            </div>
+
+
+            <select
+                id="queueCentre"
+                onchange="loadQueue()"
+            >
+
+                <option>Centre A</option>
+                <option>Centre B</option>
+                <option>Centre C</option>
+
+            </select>
+
+        </div>
+
+
+        <div
+            id="queue"
+            class="queue-list"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- OPERATOR DASHBOARD -->
+<!-- ================================================= -->
+
+<section
+    id="operatorTab"
+    class="tab-content hidden"
+>
+
+    <div class="page-title">
+
+        <span class="badge">
+            OPERATIONS
+        </span>
+
+        <h2>
+            Procurement Centre Dashboard
+        </h2>
+
+        <p>
+            Monitor workload and manage the farmer queue.
+        </p>
+
+    </div>
+
+
+    <div class="toolbar">
+
+        <select
+            id="operatorCentre"
+            onchange="loadDashboard()"
+        >
+
+            <option>Centre A</option>
+            <option>Centre B</option>
+            <option>Centre C</option>
+
+        </select>
+
+
+        <button
+            class="secondary-btn"
+            onclick="callNext()"
+        >
+            📢 Call Next Farmer
+        </button>
+
+
+        <button
+            class="demo-btn"
+            onclick="loadDemoData()"
+        >
+            ⚡ Load Demo Data
+        </button>
+
+    </div>
+
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span>Total</span>
+            <strong id="total">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Waiting</span>
+            <strong id="waiting">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Processing</span>
+            <strong id="processing">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Completed</span>
+            <strong id="completed">0</strong>
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>
+                🏢 Centre Workload
+            </h3>
+
+            <div class="meter">
+
+                <div
+                    id="workloadBar"
+                    class="meter-fill"
+                ></div>
+
+            </div>
+
+            <div class="meter-info">
+
+                <span>
+                    Current workload
+                </span>
+
+                <strong id="workload">
+                    0%
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>
+                🌾 Crop Statistics
+            </h3>
+
+            <div id="cropStats"></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h3>
+                    🎫 Queue Control
+                </h3>
+
+                <p>
+                    Manage current farmers & payment approvals
+                </p>
+
+            </div>
+
+            <div class="filter-tabs">
+                <button
+                    class="filter-btn active"
+                    id="filterBtnActive"
+                    onclick="setOperatorFilter('active', this)"
+                >
+                    Active Queue
+                </button>
+                <button
+                    class="filter-btn"
+                    id="filterBtnCompleted"
+                    onclick="setOperatorFilter('completed', this)"
+                >
+                    Completed / Payments
+                </button>
+                <button
+                    class="filter-btn"
+                    id="filterBtnAll"
+                    onclick="setOperatorFilter('all', this)"
+                >
+                    All Bookings
+                </button>
+            </div>
+
+        </div>
+
+
+        <div
+            id="operatorQueue"
+            class="queue-list"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- MY BOOKING -->
+<!-- ================================================= -->
+
+<section
+    id="bookingTab"
+    class="tab-content hidden"
+>
+
+    <div class="page-title">
+
+        <span class="badge">
+            FARMER TRACKING
+        </span>
+
+        <h2>
+            Track My Booking
+        </h2>
+
+        <p>
+            Enter your registered mobile number.
+        </p>
+
+    </div>
+
+
+    <div class="card search-card">
+
+        <form id="searchForm">
+
+            <label>
+                Mobile Number
+            </label>
+
+            <input
+                id="searchPhone"
+                type="tel"
+                placeholder="Enter registered mobile number"
+                required
+            >
+
+            <button class="primary-btn">
+                Search Booking
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div id="farmerResult"></div>
+
+</section>
+
+</main>
+
+
+<div id="toastContainer" class="toast-container"></div>
+
+<footer>
+
+    <strong>KisanQueue</strong>
+    <span>•</span>
+    Smart Last-Mile Procurement Management
+
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
